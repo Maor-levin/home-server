@@ -201,3 +201,52 @@ sudo ./setup.sh
 - **Nginx Proxy Manager**: `admin@example.com` / `changeme`
 - **Jellyfin**: Set during first login
 - **Portainer**: Set during first login
+
+## Port Forwarding & Firewall
+
+### Local Access
+
+**All services are accessible locally** (on the server itself):
+- `http://localhost:9000` - Portainer
+- `http://localhost:8096` - Jellyfin
+- `http://localhost:8080` - qBittorrent
+- `http://localhost:81` - Nginx Proxy Manager
+- `localhost:25565` - Minecraft
+
+**No firewall rules needed** for localhost access - Docker handles this automatically.
+
+### External Access (Router Port Forwarding)
+
+**Only forward Nginx ports** to your server:
+- **Port 80** (HTTP) → Your server IP
+- **Port 443** (HTTPS) → Your server IP
+
+**Do NOT forward individual service ports:**
+- ❌ Don't forward 8096 (Jellyfin)
+- ❌ Don't forward 8080 (qBittorrent)
+- ❌ Don't forward 9000 (Portainer)
+- ❌ Don't forward 81 (Nginx admin)
+
+**Why?**
+- All services are accessed through Nginx Proxy Manager
+- Only Nginx is exposed to the internet (more secure)
+- Services stay internal and are accessed via clean URLs with SSL
+
+**Access Pattern:**
+- **External**: `https://jellyfin.yourserver.duckdns.org` (via Nginx)
+- **Local**: `http://localhost:8096` (direct access)
+
+### Server Firewall (Optional)
+
+If you want to restrict access further:
+
+```bash
+# Allow Nginx ports (for external access)
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Services are accessible on localhost without firewall rules
+# Only add rules if you want local network access to specific services
+```
+
+**Best Practice**: Only expose Nginx ports (80, 443) externally. Access all services through Nginx for security and convenience.
