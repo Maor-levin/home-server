@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/hdd1/home-server/portainer:/data
+    networks:
+      - homeserver-network
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"
+    volumes:
+      - /mnt/hdd1/home-server/jellyfin/config:/config
+      - /mnt/hdd1/home-server/jellyfin/cache:/cache
+      - /mnt/hdd1/home-server/jellyfin/media:/media:ro
+      - /mnt/hdd1/home-server/qbittorrent/downloads:/downloads:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Jerusalem
+    networks:
+      - homeserver-network
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    volumes:
+      - /mnt/hdd1/home-server/qbittorrent/config:/config
+      - /mnt/hdd1/home-server/qbittorrent/downloads:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Jerusalem
+    networks:
+      - homeserver-network
+
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    volumes:
+      - /mnt/hdd1/home-server/minecraft:/data
+    environment:
+      - EULA=TRUE
+      - UID=1000
+      - GID=1000
+      - TZ=Asia/Jerusalem
+      - MEMORY=3G
+      - TYPE=PAPER
+      - VERSION=LATEST
+    networks:
+      - homeserver-network
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - "80:80" # HTTP traffic
+      - "443:443" # HTTPS traffic
+      - "81:81" # Admin UI
+    volumes:
+      - /mnt/hdd1/home-server/nginx-proxy-manager/data:/data
+      - /mnt/hdd1/home-server/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+    networks:
+      - homeserver-network
+
+networks:
+  default:
+    name: homeserver-network
