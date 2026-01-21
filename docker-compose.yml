@@ -83,5 +83,5 @@ services:
       - homeserver-network
 
 networks:
-  default:
-    name: homeserver-network
+  homeserver-network:
+    driver: bridge
