@@ -24,9 +24,15 @@ else
     echo "Docker already installed"
 fi
 
+# Load BASE_PATH from .env if it exists, otherwise use default
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+BASE_PATH=${BASE_PATH:-/mnt/hdd1/home-server}
+
 # Create parent directory with correct ownership
-mkdir -p /mnt/hdd1/home-server
-chown -R $USER_1000:$USER_1000 /mnt/hdd1/home-server
+mkdir -p "$BASE_PATH"
+chown -R $USER_1000:$USER_1000 "$BASE_PATH"
 
 # Ensure docker-compose.yml exists in current directory
 if [ ! -f docker-compose.yml ]; then
@@ -48,7 +54,7 @@ echo "Access services:"
 echo "  Portainer: http://localhost:9000"
 echo "  Jellyfin: http://localhost:8096"
 echo "  qBittorrent: http://localhost:8080"
-echo "  Minecraft: localhost:25565"
+echo "  Crafty Controller: http://localhost:8000"
 echo "  Nginx Proxy Manager: http://localhost:81"
 echo ""
 echo "Default logins:"

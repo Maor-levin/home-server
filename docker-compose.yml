@@ -9,7 +9,7 @@ services:
       - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/hdd1/home-server/portainer:/data
+      - ${BASE_PATH}/portainer:/data
     networks:
       - homeserver-network
 
@@ -20,14 +20,14 @@ services:
     ports:
       - "8096:8096"
     volumes:
-      - /mnt/hdd1/home-server/jellyfin/config:/config
-      - /mnt/hdd1/home-server/jellyfin/cache:/cache
-      - /mnt/hdd1/home-server/jellyfin/media:/media:ro
-      - /mnt/hdd1/home-server/qbittorrent/downloads:/downloads:ro
+      - ${BASE_PATH}/jellyfin/config:/config
+      - ${BASE_PATH}/jellyfin/cache:/cache
+      - ${BASE_PATH}/jellyfin/media:/media:ro
+      - ${BASE_PATH}/qbittorrent/downloads:/downloads:ro
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Jerusalem
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     networks:
       - homeserver-network
 
@@ -40,31 +40,45 @@ services:
       - "6881:6881"
       - "6881:6881/udp"
     volumes:
-      - /mnt/hdd1/home-server/qbittorrent/config:/config
-      - /mnt/hdd1/home-server/qbittorrent/downloads:/downloads
+      - ${BASE_PATH}/qbittorrent/config:/config
+      - ${BASE_PATH}/qbittorrent/downloads:/downloads
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Jerusalem
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     networks:
       - homeserver-network
 
-  minecraft:
-    image: itzg/minecraft-server:latest
-    container_name: minecraft
+  crafty-controller:
+    image: craftycontroller/crafty-4:latest
+    container_name: crafty-controller
     restart: unless-stopped
     ports:
-      - "25565:25565"
+      - "8000:8000"
+      - "8443:8443"
     volumes:
-      - /mnt/hdd1/home-server/minecraft:/data
+      - ${BASE_PATH}/crafty-controller:/crafty/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - EULA=TRUE
-      - UID=1000
-      - GID=1000
-      - TZ=Asia/Jerusalem
-      - MEMORY=3G
-      - TYPE=PAPER
-      - VERSION=LATEST
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    networks:
+      - homeserver-network
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    restart: unless-stopped
+    volumes:
+      - ${BASE_PATH}/duckdns:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SUBDOMAINS=${DUCKDNS_SUBDOMAINS}
+      - TOKEN=${DUCKDNS_TOKEN}
+      - LOG_FILE=false
     networks:
       - homeserver-network
 
@@ -77,8 +91,8 @@ services:
       - "443:443" # HTTPS traffic
       - "81:81" # Admin UI
     volumes:
-      - /mnt/hdd1/home-server/nginx-proxy-manager/data:/data
-      - /mnt/hdd1/home-server/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+      - ${BASE_PATH}/nginx-proxy-manager/data:/data
+      - ${BASE_PATH}/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
     networks:
       - homeserver-network
 
