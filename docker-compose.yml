@@ -65,23 +65,29 @@ services:
     networks:
       - homeserver-network
 
-  crafty:
-    container_name: crafty_container
+  crafty-controller:
     image: registry.gitlab.com/crafty-controller/crafty-4:latest
-    restart: always
-    environment:
-      - TZ=Etc/UTC
+    container_name: crafty-controller
+    restart: unless-stopped
     ports:
       - "8443:8443" # HTTPS
       - "8123:8123" # DYNMAP
       - "19132:19132/udp" # BEDROCK
       - "25500-25600:25500-25600" # MC SERV PORT RANGE
     volumes:
-      - ./docker/backups:/crafty/backups
-      - ./docker/logs:/crafty/logs
-      - ./docker/servers:/crafty/servers
-      - ./docker/config:/crafty/app/config
-      - ./docker/import:/crafty/import
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_PATH}/crafty/backups:/crafty/backups
+      - ${BASE_PATH}/crafty/logs:/crafty/logs
+      - ${BASE_PATH}/crafty/servers:/crafty/servers
+      - ${BASE_PATH}/crafty/config:/crafty/app/config
+      - ${BASE_PATH}/crafty/import:/crafty/import
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    networks:
+      - homeserver-network
+
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
     container_name: nginx-proxy-manager
