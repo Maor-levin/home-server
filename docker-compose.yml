@@ -49,20 +49,17 @@ services:
     networks:
       - homeserver-network
 
-  crafty-controller:
-    image: craftycm/crafty-4:latest
-    container_name: crafty-controller
+  mcsmanager:
+    image: mcsmanager/mcsmanager:latest
+    container_name: mcsmanager
     restart: unless-stopped
     ports:
-      - "8000:8000"
-      - "8443:8443"
+      - "23333:23333"
+      - "24444:24444"
     volumes:
-      - ${BASE_PATH}/crafty-controller:/crafty/app/data
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_PATH}/mcsmanager:/opt/mcsmanager/data
     environment:
       - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
     networks:
       - homeserver-network
 
