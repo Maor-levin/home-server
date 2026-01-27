@@ -50,7 +50,7 @@ services:
       - homeserver-network
 
   crafty-controller:
-    image: craftycontroller/crafty-4:latest
+    image: craftycm/crafty-4:latest
     container_name: crafty-controller
     restart: unless-stopped
     ports:
